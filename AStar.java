@@ -114,10 +114,15 @@ public class AStar {
 	class State {
 		public int[] counts;
 		public double fScore;
+		public int sum = 0;
+		public int count = 0;
+		
 		public State(int[] counts, int[] denominations, int goal) {
 			this.counts = counts;
 			for (int i=0;i<denominations.length; i++) {
 				goal -= denominations[i] * counts[i];
+				sum += denominations[i] * counts[i];
+				count ++;
 			}
 			if (goal == 0) {
 				// Force float to 0.
@@ -126,7 +131,6 @@ public class AStar {
 				fScore = goal / (double)denominations[0];
 			}
 		}
-		
 		public int numCoins() {
 			int sum = 0;
 			for(int count : counts) {
@@ -134,7 +138,6 @@ public class AStar {
 			}
 			return sum;
 		}
-		
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			for(int count : counts) {
@@ -148,12 +151,17 @@ public class AStar {
 		}
 		
 		public int hashCode() {
-			return Arrays.hashCode(counts);
+			// Ignore the specific ways to make coins and use count and sum to differentiate states.
+			//return Arrays.hashCode(counts);
+			return Objects.hash(sum, count);
 		}
 		
 		public boolean equals(Object obj) {
 			if (obj instanceof State) {
-				return Arrays.equals(counts, ((State)obj).counts);
+				State state = (State)obj;
+				// Ignore the specific ways to make coins and use count and sum to differentiate states.
+				//return Arrays.equals(counts, state).counts);
+				return state.counts == counts && state.sum == sum;
 			}
 			return false;
 		}
