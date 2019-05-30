@@ -19,11 +19,8 @@ public class AStar {
 	public static void main(String[] args) {
 		long start1 = (new Date()).getTime();
 		for(int i=0;i<10;i++) {
-			System.out.println(i);
 			AStar astar = new AStar();
-			int[] coins = new int[]{(int)(Math.random() * 50), (int)(Math.random() * 50), (int)(Math.random() * 50), (int)(Math.random() * 50), (int)(Math.random() * 50)};
-			Arrays.sort(coins);
-			reverse(coins);		
+			int[] coins = createCoins(5);
 			int goal = 0;
 			goal += coins[0] * (int)(Math.random() * 2);
 			goal += coins[1] * (int)(Math.random() * 2);
@@ -42,9 +39,7 @@ public class AStar {
 		long start2 = (new Date()).getTime();
 		for(int i=0;i<10;i++) {
 			DynamicProgramming dp = new DynamicProgramming();
-			int[] coins = new int[]{(int)(Math.random() * 50), (int)(Math.random() * 50), (int)(Math.random() * 50), (int)(Math.random() * 50), (int)(Math.random() * 50)};
-			Arrays.sort(coins);
-			reverse(coins);			
+			int[] coins = createCoins(5);
 			int goal = 0;
 			goal += coins[0] * (int)(Math.random() * 2);
 			goal += coins[1] * (int)(Math.random() * 2);
@@ -56,6 +51,16 @@ public class AStar {
 		long stop2 = (new Date()).getTime();
 		System.out.println("AStar: " + (stop1 - start1));
 		System.out.println("DynamicProgramming: " + (stop2 - start2));
+	}
+	
+	public static int[] createCoins(int size) {
+		int[] coins = new int[size];
+		for(int i=0;i<size;i++) {
+			coins[i] = (int)(Math.random() * 50) + 1;
+		}
+		Arrays.sort(coins);
+		reverse(coins);	
+		return coins;
 	}
 	
 	public static void reverse(int[] input) {
@@ -77,8 +82,6 @@ public class AStar {
 		
 		while (!openSet.isEmpty()) {	
 			State current = fValue.poll();
-			
-			System.out.println(current);
 			
 			if (current.fScore <= 0) {
 				return current.numCoins();
@@ -116,8 +119,14 @@ public class AStar {
 			for (int i=0;i<denominations.length; i++) {
 				goal -= denominations[i] * counts[i];
 			}
-			fScore = goal / (double)denominations[0];
+			if (goal == 0) {
+				// Force float to 0.
+				fScore = 0;
+			} else {
+				fScore = goal / (double)denominations[0];
+			}
 		}
+		
 		public int numCoins() {
 			int sum = 0;
 			for(int count : counts) {
@@ -125,6 +134,7 @@ public class AStar {
 			}
 			return sum;
 		}
+		
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			for(int count : counts) {
@@ -135,6 +145,17 @@ public class AStar {
 			
 			
 			return sb.toString();
+		}
+		
+		public int hashCode() {
+			return Arrays.hashCode(counts);
+		}
+		
+		public boolean equals(Object obj) {
+			if (obj instanceof State) {
+				return Arrays.equals(counts, ((State)obj).counts);
+			}
+			return false;
 		}
 	}
 }
