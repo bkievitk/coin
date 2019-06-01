@@ -9,16 +9,16 @@ public class AStar {
 		@Override
 		public int compare(State arg0, State arg1) {
 			if (arg0.fScore < arg1.fScore) {
-				return 1;
-			} else {
 				return -1;
+			} else {
+				return 1;
 			}
 		}
 	});
 	
 	public static void main(String[] args) {
 		long start1 = (new Date()).getTime();
-		for(int i=0;i<10;i++) {
+		for(int i=0;i<10000;i++) {
 			AStar astar = new AStar();
 			int[] coins = createCoins(5);
 			int goal = 0;
@@ -26,18 +26,13 @@ public class AStar {
 			goal += coins[1] * (int)(Math.random() * 2);
 			goal += coins[2] * (int)(Math.random() * 2);
 			goal += coins[3] * (int)(Math.random() * 2);
-			goal += coins[4] * (int)(Math.random() * 2);
-			for(int coin : coins) {
-				System.out.print(coin + ",");
-			}
-			System.out.println();
-			System.out.println(goal);
-			
+			goal += coins[4] * (int)(Math.random() * 2);			
 			astar.solve(coins, goal);
 		}
 		long stop1 = (new Date()).getTime();
+		System.out.println("AStar Complete");
 		long start2 = (new Date()).getTime();
-		for(int i=0;i<10;i++) {
+		for(int i=0;i<10000;i++) {
 			DynamicProgramming dp = new DynamicProgramming();
 			int[] coins = createCoins(5);
 			int goal = 0;
@@ -81,9 +76,8 @@ public class AStar {
 		fValue.add(start);
 		
 		while (!openSet.isEmpty()) {	
-			State current = fValue.poll();
-			
-			if (current.fScore <= 0) {
+			State current = fValue.poll();			
+			if (current.complete(goal)) {
 				return current.numCoins();
 			}
 			openSet.remove(current);
@@ -96,15 +90,17 @@ public class AStar {
 				}
 				newCounts[i] ++;
 				State newState = new State(newCounts, denominations, goal);
-				if (newState.fScore >= 0 && !closedSet.contains(newState)) {
-					int tentativeGScore = gValue.get(current) + 1;
-					if (!openSet.contains(newState)) {
-						openSet.add(newState);
-					} else if (tentativeGScore >= gValue.get(newState)) {
-						continue;
-					}
-					gValue.put(newState, tentativeGScore);
+				if (newState.past(goal) || closedSet.contains(newState)) {
+					continue;
 				}
+				
+				int tentativeGScore = gValue.get(current) + 1;
+				if (!openSet.contains(newState)) {
+					openSet.add(newState);
+				} else if (tentativeGScore >= gValue.get(newState)) {
+					continue;
+				}
+				gValue.put(newState, tentativeGScore);
 				fValue.add(newState);
 			}
 		}
@@ -143,11 +139,18 @@ public class AStar {
 			for(int count : counts) {
 				sb.append(count + ",");
 			}
-			sb.append("\n");
-			sb.append("fScore: " + fScore + "\n");
+			sb.append("; fScore: " + fScore);
 			
 			
 			return sb.toString();
+		}
+		
+		public boolean complete(int goal) {
+			return goal <= sum;
+		}
+		
+		public boolean past(int goal) {
+			return goal < sum;
 		}
 		
 		public int hashCode() {
