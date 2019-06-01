@@ -12,7 +12,11 @@ public class DynamicProgramming {
 		int minSolution = Integer.MAX_VALUE;
 		for(int denomination : denominations) {
 			if (goal >= denomination) {
-				minSolution = Math.min(minSolution, solve(denominations, goal - denomination) + 1);
+				Integer solved = minCoins.get(goal - denomination);
+				if (solved == null) {
+					solved = solve(denominations, goal - denomination);
+				}
+				minSolution = Math.min(minSolution, solved + 1);
 			}
 		}
 		minCoins.put(goal, minSolution);
